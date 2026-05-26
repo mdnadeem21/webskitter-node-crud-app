@@ -157,7 +157,7 @@ class ProductController{
           return res.status(500).json({
             status: false,
             message: "something went wrong",
-            error: err,
+            error: error.message,
           });
         }
       }
