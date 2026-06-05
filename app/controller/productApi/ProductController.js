@@ -1,10 +1,12 @@
 const Product=require('../../models/product');
 const StatusCode = require('../../utils/statusCode')
+const fs = require('fs');
 
 
 
 class ProductController{
     async createProduct(req,res){
+      // console.log(req.file)
       try{
         const {productName,productPrice,desc}=req.body;
 
@@ -13,6 +15,9 @@ class ProductController{
             productPrice,
             desc
         })
+        if(req.file){
+          product.productImage=req.file.path
+        }
         const data=await product.save();
         return res.status(201).json({
             status:true,
@@ -148,7 +153,15 @@ class ProductController{
         try {
           const id = req.params.id;
           //const {productName,productPrice,desc}=req.body
-          await Product.findByIdAndUpdate(id, req.body, { new: true });
+          const product = await Product.findById(id)
+          if (!product) {
+            return res.status(404).json({ status: false, message: "Product not found" });
+          }
+
+          if(req.file){
+            product.productImage = req.file.path
+          }
+          await Product.findByIdAndUpdate(id, product, { new: true });
           return res.status(200).json({
             status: true,
             message: "Product updated successfully",
@@ -164,20 +177,42 @@ class ProductController{
 
       async deleteProduct(req, res) {
         try {
-          const id = req.params.id;
-          await Product.findByIdAndDelete(id);
-          return res.status(200).json({
-            status: true,
-            message: "Product deleted successfully",
-          });
+            const id = req.params.id;
+    
+            // 1. Fetch the product details
+            const product = await Product.findById(id);
+            if (!product) {
+                return res.status(404).json({ 
+                    status: false, 
+                    message: "Product not found" 
+                });
+            }
+    
+            
+            if (product.productImage && fs.existsSync(product.productImage)) {
+                try {
+                    await fs.promises.unlink(product.productImage);
+                } catch (fileError) {
+                    console.error("File deletion failed:", fileError);
+                }
+            }
+    
+            // 3. Delete the document from MongoDB
+            await Product.findByIdAndDelete(id);
+    
+            return res.status(200).json({
+                status: true,
+                message: "Product deleted successfully",
+            });
+    
         } catch (error) {
-          return res.status(500).json({
-            status: false,
-            message: "something went wrong",
-            error: err,
-          });
+            return res.status(500).json({
+                status: false,
+                message: "Something went wrong",
+                error: error.message, 
+            });
         }
-      }
+    }
 
 
 }

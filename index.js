@@ -2,6 +2,7 @@ require('dotenv').config()
 
 
 const express=require('express');
+const path=require('path')
 
 const connectDB = require('./app/config/db');
 
@@ -26,6 +27,10 @@ app.use('/api/product',productRoutes)
 app.use('/api/user',userRoutes)
 app.use('/api/student',studentRoute)
 
+//static folder
+app.use(express.static('public'))
+app.use('uploads',express.static(path.join(__dirname,'/uploads')))
+app.use('/uploads',express.static('uploads'))
 
 const PORT=process.env.PORT ;
 
