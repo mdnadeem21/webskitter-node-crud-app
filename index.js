@@ -20,12 +20,14 @@ app.use(express.json());
 const productRoutes = require('./app/routes/productRoute');
 const userRoutes = require('./app/routes/userRoute')
 const studentRoute = require('./app/routes/studentRoute')
+const employeeRoute = require('./app/routes/employeeRoute')
 app.get('/',(req,res)=>{
     res.send('<h1>Welcome to the code...</h1>')
 })
 app.use('/api/product',productRoutes)
 app.use('/api/user',userRoutes)
 app.use('/api/student',studentRoute)
+app.use('/api/employee',employeeRoute)
 
 //static folder
 app.use(express.static('public'))
