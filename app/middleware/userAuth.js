@@ -3,17 +3,38 @@ const jwt = require('jsonwebtoken')
 
 const userAuth = async (req,res,next) => {
     try {
-        const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer","")
-    
+        const token = req.headers['authorization']
         if(!token){
-            throw new ApiError(401,"Unauthorized request")
+           return res.status(401).json({
+            status:false,
+            message:"Access denied. No token provided"
+           })
         }
-       const decodedToken = jwt.verify(token,process.env.JWT_SECRET_CODE)
-       const user = await User.findById(decodedToken?._id).select("-password")
-       if (!user) {
-            throw new Error("Unauthorise user")
-       }
-       req.user = user;
+       const bearertoken=token.split(' ')[1];
+
+       if(!bearertoken){
+            return res.status(401).json({
+                status:false,
+                message:"Access denied. Invalid token"
+            });
+        }
+        try {
+            const decodedToken = jwt.verify(bearertoken,process.env.JWT_SECRET_CODE)
+            req.user = decodedToken;
+            // const user = await User.findById(decodedToken?._id).select("-password")
+        //     if (!user) {
+        //         return res.status(401).json({
+        //             status:false,
+        //             message:"Unauthorised User"
+        //         });
+        //    }
+        } catch (error) {
+            return res.status(400).json({
+                status:false,
+                message:"Invalid token"
+            });
+        }
+       
        next();
     } catch (error) {
         

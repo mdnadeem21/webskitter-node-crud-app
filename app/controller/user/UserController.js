@@ -39,7 +39,6 @@ class UserController{
             })
 
             const users=await user.save();
-            console.log(`New User : ${user}`)
         return res.status(201).json({
             status:true,
             message:"User created or registered successfully",
@@ -201,7 +200,12 @@ class UserController{
     }
 
     async userDashboard(req,res){
-        console.log('User Dashboard')
+        return res.status(200)
+                    .json({
+                        status:true,
+                        message:"Dashboard Access granted",
+                        user:req.user
+                    })
     }
 }
 
